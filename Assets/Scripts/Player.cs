@@ -4,24 +4,28 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
-[SerializeField]
-private float _speed = 3.5f;
-private float _speedMultiplier = 2f;
-[SerializeField]
-private GameObject _laserPrefab;
-[SerializeField]
-private float _fireRate = 0.5f;
-private float _canFire = -1f;
-[SerializeField]
-private int _lives = 3;
-private SpawnManager _spawnManager;
-[SerializeField]
-private bool _isTripleShotActive = false;
-[SerializeField]
-private GameObject _tripleShotPrefab;
-//[SerializeField]
-private bool _isSpeedBoostActive = false;
+    [SerializeField]
+    private float _speed = 3.5f;
+    private float _speedMultiplier = 2f;
+    [SerializeField]
+    private GameObject _laserPrefab;
+    [SerializeField]
+    private float _fireRate = 0.5f;
+    private float _canFire = -1f;
+    [SerializeField]
+    private int _lives = 3;
+    private SpawnManager _spawnManager;
+    [SerializeField]
+    private bool _isTripleShotActive = false;
+    [SerializeField]
+    private GameObject _tripleShotPrefab;
+    //[SerializeField]
+    private bool _isSpeedBoostActive = false;
+    private bool _isShieldActive = false;
+    [SerializeField]
+    private GameObject _shieldVisualizer;
+    [SerializeField]
+    private int score;
 
     // Start is called before the first frame update
     void Start()
@@ -84,6 +88,13 @@ private bool _isSpeedBoostActive = false;
 
     public void Damage()
     {
+        if (_isShieldActive)
+        {
+            _isShieldActive = false;
+            _shieldVisualizer.SetActive(false);
+            return;
+        }
+
         _lives--;
 
         if (_lives < 1)
@@ -126,4 +137,19 @@ private bool _isSpeedBoostActive = false;
         _isSpeedBoostActive = false;
     }
 
+    public void ShieldActive()
+    {
+        _isShieldActive = true;
+        _shieldVisualizer.SetActive(true);        
+    //    StartCoroutine(ShieldPowerDownRoutine());
+    }
+
+    //IEnumerator ShieldPowerDownRoutine()
+    //{
+    //    yield return new WaitForSeconds(5.0f);
+    //    _isShieldActive = false;
+    //}
+
+    // method to add score
+    // update score in ui
 }
