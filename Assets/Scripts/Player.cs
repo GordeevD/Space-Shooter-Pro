@@ -25,13 +25,19 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _shieldVisualizer;
     [SerializeField]
-    private int score;
-
+    private int _score;
+    private UIManager _uiManager;
     // Start is called before the first frame update
     void Start()
     {
         // take the cuttent position = new position (0, 0, 0)
 	    transform.position = new Vector3(0, 0, 0);
+
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+        if (_uiManager == null)
+        {
+            Debug.LogError("UI manager is NULL");
+        }
 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         if (_spawnManager == null)
@@ -97,12 +103,14 @@ public class Player : MonoBehaviour
 
         _lives--;
 
+        _uiManager.UpdateLives(_lives);
+
         if (_lives < 1)
         {
             _spawnManager.OnPlayerDeath();
             Destroy(this.gameObject);
 
-            // erase all enemies
+  // erase all enemies
             GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
             foreach (GameObject enemyToDestroy in enemies)
             {
@@ -151,5 +159,10 @@ public class Player : MonoBehaviour
     //}
 
     // method to add score
-    // update score in ui
+    public void AddScore(int points)
+    {
+        // update score in ui
+        _score += points;
+        _uiManager.UpdateScore(_score);
+    }
 }
