@@ -136,11 +136,11 @@ public class Player : MonoBehaviour
             Destroy(this.gameObject);
 
   // erase all enemies
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            foreach (GameObject enemyToDestroy in enemies)
-            {
-                Destroy(enemyToDestroy);
-            }
+ //           GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+ //           foreach (GameObject enemyToDestroy in enemies)
+ //           {
+ //               Destroy(enemyToDestroy);
+ //           }
         }
     }
 

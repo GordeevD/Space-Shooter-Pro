@@ -14,6 +14,17 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(1); // current game scene. you can set in File - Built settings.
         }
+
+        // quit the game if pressed ESC
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
+        }
+
     }
 
     public void GameOver()
