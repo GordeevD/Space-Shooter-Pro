@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserSoundClip;
     private AudioSource _audioSource;
+    private byte _shieldStrength = 0;
+     
     // Start is called before the first frame update
     void Start()
     {
@@ -78,7 +80,12 @@ public class Player : MonoBehaviour
         //transform.Translate(Vector3.right * 5 * Time.deltaTime);
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
 
-        transform.Translate(direction * _speed * Time.deltaTime);
+        float speed = _speed;
+        if (Input.GetKey(KeyCode.LeftShift)) {
+            speed *= 2;
+        }
+
+        transform.Translate(direction * speed * Time.deltaTime);
         
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f,0),0);
 
@@ -112,13 +119,22 @@ public class Player : MonoBehaviour
     {
         if (_isShieldActive)
         {
-            _isShieldActive = false;
-            _shieldVisualizer.SetActive(false);
+            _shieldStrength -= 1;
+            if (_shieldStrength < 1)
+            {
+                _isShieldActive = false;
+                _shieldVisualizer.SetActive(false);
+            }
+            else
+            {
+                ChangeShieldColor(_shieldStrength);
+            }
             return;
         }
 
         _lives--;
 
+        
         //if lives = 2, damage right engine
         // if 1 damage left engine
         if (_lives == 2)
@@ -134,14 +150,30 @@ public class Player : MonoBehaviour
         {
             _spawnManager.OnPlayerDeath();
             Destroy(this.gameObject);
-
-  // erase all enemies
- //           GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
- //           foreach (GameObject enemyToDestroy in enemies)
- //           {
- //               Destroy(enemyToDestroy);
- //           }
         }
+        else
+        {
+            ShakeCamera(0.5f, 0.2f); // duartion and magnitude
+        }
+
+    }
+
+    public void ShakeCamera(float _shakeDuration, float _shakeMagnitude)
+    {
+        StartCoroutine(ShakeRoutine(_shakeDuration, _shakeMagnitude));
+    }
+
+    IEnumerator ShakeRoutine(float _shakeDuration, float _shakeMagnitude)
+    {
+        Camera camera = Camera.main;
+        Vector3 cameraPosition = camera.transform.localPosition;
+        float endTime = Time.time + _shakeDuration;
+        while (endTime > Time.time)
+            {
+                camera.transform.localPosition = cameraPosition + Random.insideUnitSphere * _shakeMagnitude;
+                yield return null;
+            }
+        camera.transform.localPosition = cameraPosition;
     }
 
     public void TripleShotActive()
@@ -173,15 +205,21 @@ public class Player : MonoBehaviour
     public void ShieldActive()
     {
         _isShieldActive = true;
-        _shieldVisualizer.SetActive(true);        
-    //    StartCoroutine(ShieldPowerDownRoutine());
+        _shieldVisualizer.SetActive(true);
+
+        if (_shieldStrength < 3)
+        {
+            _shieldStrength += 1;
+            ChangeShieldColor(_shieldStrength);
+        }
     }
 
-    //IEnumerator ShieldPowerDownRoutine()
-    //{
-    //    yield return new WaitForSeconds(5.0f);
-    //    _isShieldActive = false;
-    //}
+    void ChangeShieldColor(byte _shieldStrength)
+    {
+        List<Color> _shieldColors = new List<Color>() { Color.white, Color.green, Color.red };
+        SpriteRenderer shieldSpriteRender = _shieldVisualizer.GetComponent<SpriteRenderer>();
+        shieldSpriteRender.color = _shieldColors[_shieldStrength - 1];
+    }
 
     // method to add score
     public void AddScore(int points)
