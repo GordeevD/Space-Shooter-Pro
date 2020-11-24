@@ -33,7 +33,10 @@ public class Player : MonoBehaviour
     private AudioClip _laserSoundClip;
     private AudioSource _audioSource;
     private byte _shieldStrength = 0;
-     
+    [SerializeField]
+    private byte _laserCount = 15;
+    [SerializeField]
+    private AudioClip _laserOutOfAmmo;
     // Start is called before the first frame update
     void Start()
     {
@@ -56,9 +59,11 @@ public class Player : MonoBehaviour
         if (_audioSource == null)
         {
             Debug.LogError("The AudioScourse is NULL.");
-        } else
+        }
+        if (_laserCount == 0)
         {
-            _audioSource.clip = _laserSoundClip;
+            _laserCount = 15;
+            _uiManager.UpdateAmmo(_laserCount);
         }
     }
 
@@ -69,7 +74,7 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
-            FireLaser();    
+            FireLaser();
         }
     }
     
@@ -101,6 +106,17 @@ public class Player : MonoBehaviour
 
     void FireLaser()
     {
+        if (_laserCount < 1)
+        {
+            // sound, ammo shake
+            _audioSource.clip = _laserOutOfAmmo;
+            _audioSource.Play();
+            _uiManager.OutOfAmmo();
+            return;
+        }
+        _laserCount -= 1;
+        _uiManager.UpdateAmmo(_laserCount);
+
         _canFire = Time.time + _fireRate;
 
         if (_isTripleShotActive)
@@ -112,6 +128,7 @@ public class Player : MonoBehaviour
             Instantiate(_laserPrefab, transform.position + new Vector3(0, 1.05f, 0), Quaternion.identity);
         }
 
+        _audioSource.clip = _laserSoundClip;
         _audioSource.Play();
     }
 

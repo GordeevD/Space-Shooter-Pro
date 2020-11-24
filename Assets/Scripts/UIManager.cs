@@ -17,8 +17,10 @@ public class UIManager : MonoBehaviour
     private Text _gameOverText;
     [SerializeField]
     private Text _restartText;
-
     private GameManager _gameManager;
+    [SerializeField]
+    private Text _ammoText;
+    private Vector3 _ammoTextStartPosition;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,6 +33,8 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogError("GameManager is NULL");
         }
+        _ammoText.text = "Ammo: " + 15;
+        _ammoTextStartPosition = _ammoText.transform.localPosition;
     }
 
     // Update is called once per frame
@@ -49,6 +53,24 @@ public class UIManager : MonoBehaviour
                 GameOverSequence();
             }
         }
+    }
+
+    public void UpdateAmmo(byte _laserCount)
+    {
+        _ammoText.text = "Ammo: " + _laserCount.ToString();
+    }
+
+    public void OutOfAmmo()
+    {
+        StartCoroutine(ShakeAmmoRoutine());
+    }
+
+    IEnumerator ShakeAmmoRoutine()
+    {
+        _ammoText.transform.localPosition = _ammoTextStartPosition;
+        _ammoText.transform.localPosition = _ammoTextStartPosition + new Vector3(5f, 0, 0);
+        yield return new WaitForSeconds(0.1f);
+        _ammoText.transform.localPosition = _ammoTextStartPosition;
     }
 
     void GameOverSequence()
