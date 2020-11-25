@@ -36,7 +36,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private byte _laserCount = 15;
     [SerializeField]
-    private AudioClip _laserOutOfAmmo;
+    private AudioClip _laserOutOfAmmoClip;
     // Start is called before the first frame update
     void Start()
     {
@@ -109,7 +109,7 @@ public class Player : MonoBehaviour
         if (_laserCount < 1)
         {
             // sound, ammo shake
-            _audioSource.clip = _laserOutOfAmmo;
+            _audioSource.clip = _laserOutOfAmmoClip;
             _audioSource.Play();
             _uiManager.OutOfAmmo();
             return;
@@ -217,6 +217,30 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(5.0f);
         _speed /= _speedMultiplier;
         _isSpeedBoostActive = false;
+    }
+
+    public void AmmoReboot()
+    {
+        _laserCount = 15;
+        _uiManager.UpdateAmmo(_laserCount);
+    }
+
+    public void Heal()
+    {
+        if (_lives > 0 && _lives < 3)
+        {
+            _lives += 1;
+        }
+
+        if (_lives == 2)
+        {
+            _rightEngine.SetActive(false);
+        }
+        else if (_lives == 3)
+        {
+            _leftEngine.SetActive(false);
+        }
+        _uiManager.UpdateLives(_lives);
     }
 
     public void ShieldActive()
