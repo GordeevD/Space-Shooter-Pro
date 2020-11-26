@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     private byte _laserCount = 15;
     [SerializeField]
     private AudioClip _laserOutOfAmmoClip;
+    private bool _secondaryFireActive = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -76,6 +77,7 @@ public class Player : MonoBehaviour
         {
             FireLaser();
         }
+        
     }
     
     void CalculateMovement() 
@@ -106,6 +108,15 @@ public class Player : MonoBehaviour
 
     void FireLaser()
     {
+        if (_secondaryFireActive)
+        {
+            FireSuperLaser();
+            _audioSource.clip = _laserSoundClip;
+            _audioSource.Play();
+            return;
+        }
+        
+
         if (_laserCount < 1)
         {
             // sound, ammo shake
@@ -119,7 +130,7 @@ public class Player : MonoBehaviour
 
         _canFire = Time.time + _fireRate;
 
-        if (_isTripleShotActive)
+         if (_isTripleShotActive)
         {
             Instantiate(_tripleShotPrefab, transform.position, Quaternion.identity);
         }
@@ -131,6 +142,31 @@ public class Player : MonoBehaviour
         _audioSource.clip = _laserSoundClip;
         _audioSource.Play();
     }
+
+    void FireSuperLaser()
+    {
+
+        Transform target = LocateTarget();
+        GameObject laser = Instantiate(_laserPrefab, transform.position + new Vector3(0, 1.05f, 0), Quaternion.identity);
+        laser.GetComponent<Laser>().AssignTarget(target);
+
+    }
+
+    Transform LocateTarget()
+    {
+        Transform target = null;
+        GameObject[] enemyList = GameObject.FindGameObjectsWithTag("Enemy");
+        float minDist = Mathf.Infinity;
+        foreach (GameObject enemy in enemyList) {
+            float dist = Vector3.Distance(enemy.transform.position, transform.position);
+            if (dist < minDist)
+            {
+                target = enemy.transform;
+            }
+        }
+        return target;
+    }
+
 
     public void Damage()
     {
@@ -241,6 +277,18 @@ public class Player : MonoBehaviour
             _leftEngine.SetActive(false);
         }
         _uiManager.UpdateLives(_lives);
+    }
+
+    public void SecondaryFire()
+    {
+        StartCoroutine(SecondaryFireRoutine());
+    }
+
+    IEnumerator SecondaryFireRoutine()
+    {
+        _secondaryFireActive = true;
+        yield return new WaitForSeconds(5f);
+        _secondaryFireActive = false;
     }
 
     public void ShieldActive()

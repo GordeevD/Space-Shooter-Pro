@@ -53,8 +53,11 @@ public class Powerup : MonoBehaviour
                     case 4:
                         player.Heal();
                         break;
+                    case 5:
+                        player.SecondaryFire();
+                        break;
                     default:
-                        Debug.Log("Default Value");
+                        Debug.Log("Default Value " + _powerupID);
                         break;
                 }
             }

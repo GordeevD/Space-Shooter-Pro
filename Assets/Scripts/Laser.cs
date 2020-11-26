@@ -7,7 +7,13 @@ public class Laser : MonoBehaviour
     [SerializeField]
     private float _speed = 8f;
     private bool _isEnemyLaser = false;
+    private Transform _target = null;
+    Rigidbody2D rb;
 
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
     // Update is called once per frame
     void Update()
     {
@@ -16,37 +22,38 @@ public class Laser : MonoBehaviour
             MoveDown(); 
         } else
         {
-            MoveUp();
+            if (_target == null)
+            {
+                MoveUp();
+            }
+            else
+            {
+                MoveToTarget();
+            }
         }
+    }
+
+    void MoveToTarget()
+    {
+        rb.velocity = transform.up * 350f * Time.deltaTime;
+        Vector3 targetVector = _target.position - transform.position;
+        float rotatingIndex = Vector3.Cross(targetVector, transform.up).z;
+        rb.angularVelocity = -1 * rotatingIndex * 2000f * Time.deltaTime;
     }
 
     void MoveUp()
     {
         transform.Translate(Vector3.up * _speed * Time.deltaTime);
-
-        if (transform.position.y > 8f)
-        {
-            if (transform.parent != null)
-            {
-                Destroy(transform.parent.gameObject);
-            }
-            Destroy(this.gameObject);
-        }
     }
 
     void MoveDown()
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
+    }
 
-        
-        if (transform.position.y < -6f)
-        {
-            if (transform.parent != null)
-            {
-                Destroy(transform.parent.gameObject);
-            }
-            Destroy(this.gameObject);
-        }
+    public void AssignTarget(Transform target)
+    {
+        _target = target;
     }
 
     public void AssignEnemyLaser()
@@ -64,5 +71,14 @@ public class Laser : MonoBehaviour
                 player.Damage();
             }
         }
+    }
+
+    void OnBecameInvisible()
+    {
+        if (transform.parent != null)
+        {
+            Destroy(transform.parent.gameObject);
+        }
+        Destroy(this.gameObject);
     }
 }
