@@ -21,6 +21,8 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Text _ammoText;
     private Vector3 _ammoTextStartPosition;
+    [SerializeField]
+    private Slider _trustersHUD;
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +37,7 @@ public class UIManager : MonoBehaviour
         }
         _ammoText.text = "Ammo: " + 15;
         _ammoTextStartPosition = _ammoText.transform.localPosition;
+        _trustersHUD.value = 0;
     }
 
     // Update is called once per frame
@@ -89,6 +92,19 @@ public class UIManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             _gameOverText.text = "";
             yield return new WaitForSeconds(0.5f);
+        }
+    }
+
+    public void UpdateTruster(byte val)
+    {
+        _trustersHUD.value = val;
+    }
+    public void SetTrusterBarColor(Color val)
+    {
+        Image img = _trustersHUD.fillRect.GetComponent<Image>();
+        if (img != null && val != null)
+        {
+            img.color = val;
         }
     }
 }

@@ -38,6 +38,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserOutOfAmmoClip;
     private bool _secondaryFireActive = false;
+    private byte _trusterValue = 0;
+    private bool _trusterReady = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -66,6 +68,8 @@ public class Player : MonoBehaviour
             _laserCount = 15;
             _uiManager.UpdateAmmo(_laserCount);
         }
+
+        _uiManager.SetTrusterBarColor(Color.red);
     }
 
     // Update is called once per frame
@@ -88,8 +92,16 @@ public class Player : MonoBehaviour
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
 
         float speed = _speed;
-        if (Input.GetKey(KeyCode.LeftShift)) {
+        
+        if (Input.GetKey(KeyCode.LeftShift) && _trusterReady) {
             speed *= 2;
+            _trusterValue += 1;
+            _uiManager.UpdateTruster(_trusterValue);
+            if (_trusterValue == 100)
+            {
+                _trusterReady = false;
+                StartCoroutine(TrusterCoolDownRoutine());
+            }
         }
 
         transform.Translate(direction * speed * Time.deltaTime);
@@ -104,6 +116,19 @@ public class Player : MonoBehaviour
             transform.position = new Vector3(11.3f, transform.position.y, 0);
         }
 
+    }
+
+    IEnumerator TrusterCoolDownRoutine()
+    {
+        _uiManager.SetTrusterBarColor(Color.grey);
+        while (_trusterValue > 0)
+        {
+            _trusterValue -= 1;
+            _uiManager.UpdateTruster(_trusterValue);
+            yield return new WaitForSeconds(0.3f);
+        }
+        _uiManager.SetTrusterBarColor(Color.red);
+        _trusterReady = true;
     }
 
     void FireLaser()
