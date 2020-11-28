@@ -125,7 +125,7 @@ public class Player : MonoBehaviour
         {
             _trusterValue -= 1;
             _uiManager.UpdateTruster(_trusterValue);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.1f);
         }
         _uiManager.SetTrusterBarColor(Color.red);
         _trusterReady = true;
