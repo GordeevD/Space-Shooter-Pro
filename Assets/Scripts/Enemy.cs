@@ -180,4 +180,13 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    private void OnBecameInvisible()
+    {
+        _canFire = false;
+    }
+    private void OnBecameVisible()
+    {
+        _canFire = true;
+    }
+
 }

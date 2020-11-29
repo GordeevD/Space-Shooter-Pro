@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _tripleShotPrefab;
     //[SerializeField]
-    private bool _isSpeedBoostActive = false;
+//    private bool _isSpeedBoostActive = false;
     private bool _isShieldActive = false;
     [SerializeField]
     private GameObject _shieldVisualizer;
@@ -38,13 +38,15 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserOutOfAmmoClip;
     private bool _secondaryFireActive = false;
-    private byte _trusterValue = 0;
+    private byte _trusterValue = 100;
     private bool _trusterReady = true;
+    [SerializeField]
+    private GameObject _thrusterVisualizer;
     // Start is called before the first frame update
     void Start()
     {
         // take the cuttent position = new position (0, 0, 0)
-	    transform.position = new Vector3(0, 0, 0);
+        transform.position = new Vector3(0, 0, 0);
 
         _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
         if (_uiManager == null)
@@ -69,7 +71,9 @@ public class Player : MonoBehaviour
             _uiManager.UpdateAmmo(_laserCount);
         }
 
+        _uiManager.UpdateTruster(_trusterValue);
         _uiManager.SetTrusterBarColor(Color.red);
+
     }
 
     // Update is called once per frame
@@ -81,10 +85,10 @@ public class Player : MonoBehaviour
         {
             FireLaser();
         }
-        
+
     }
-    
-    void CalculateMovement() 
+
+    void CalculateMovement()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
@@ -92,17 +96,27 @@ public class Player : MonoBehaviour
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
 
         float speed = _speed;
+
         
-        if (Input.GetKey(KeyCode.LeftShift) && _trusterReady) {
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && _trusterReady) {
             speed *= 2;
-            _trusterValue += 1;
+
+            _thrusterVisualizer.transform.localScale = new Vector3(1 + (speed / 100) * 2, 1, 1);
+
+            _trusterValue -= 1;
             _uiManager.UpdateTruster(_trusterValue);
-            if (_trusterValue == 100)
+            if (_trusterValue == 0)
             {
                 _trusterReady = false;
                 StartCoroutine(TrusterCoolDownRoutine());
             }
         }
+        else
+        {
+            _thrusterVisualizer.transform.localScale = new Vector3(1, 1, 1);
+        }
+
+
 
         transform.Translate(direction * speed * Time.deltaTime);
         
@@ -121,9 +135,9 @@ public class Player : MonoBehaviour
     IEnumerator TrusterCoolDownRoutine()
     {
         _uiManager.SetTrusterBarColor(Color.grey);
-        while (_trusterValue > 0)
+        while (_trusterValue < 100)
         {
-            _trusterValue -= 1;
+            _trusterValue += 1;
             _uiManager.UpdateTruster(_trusterValue);
             yield return new WaitForSeconds(0.1f);
         }
@@ -268,7 +282,7 @@ public class Player : MonoBehaviour
 
     public void SpeedBoostActive()
     {
-        _isSpeedBoostActive = true;
+     //   _isSpeedBoostActive = true;
         _speed *= _speedMultiplier;
         StartCoroutine(SpeedBoostPowerDownRoutine());
     }
@@ -277,7 +291,7 @@ public class Player : MonoBehaviour
     {
         yield return new WaitForSeconds(5.0f);
         _speed /= _speedMultiplier;
-        _isSpeedBoostActive = false;
+    //    _isSpeedBoostActive = false;
     }
 
     public void AmmoReboot()

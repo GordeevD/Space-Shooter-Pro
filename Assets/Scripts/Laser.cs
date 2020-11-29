@@ -37,6 +37,8 @@ public class Laser : MonoBehaviour
     {
         rb.velocity = transform.up * 350f * Time.deltaTime;
         Vector3 targetVector = _target.position - transform.position;
+        //targetVector.Normalize();
+
         float rotatingIndex = Vector3.Cross(targetVector, transform.up).z;
         rb.angularVelocity = -1 * rotatingIndex * 2000f * Time.deltaTime;
     }

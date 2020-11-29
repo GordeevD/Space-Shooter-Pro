@@ -19,15 +19,13 @@ public class UIManager : MonoBehaviour
     private Text _restartText;
     private GameManager _gameManager;
     [SerializeField]
-    private Text _ammoText;
-    private Vector3 _ammoTextStartPosition;
+    private Slider _ammoCount;
+    private Vector3 _ammoCountStartPosition;
     [SerializeField]
     private Slider _trustersHUD;
     // Start is called before the first frame update
     void Start()
     {
-        //_liveSprites[] = 3;
-        //assign text component to the
         _scoreText.text = "Score: " + 0;
         _gameOverText.gameObject.SetActive(false);
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
@@ -35,9 +33,8 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogError("GameManager is NULL");
         }
-        _ammoText.text = "Ammo: " + 15;
-        _ammoTextStartPosition = _ammoText.transform.localPosition;
-        _trustersHUD.value = 0;
+
+        _ammoCountStartPosition = _ammoCount.transform.localPosition;
     }
 
     // Update is called once per frame
@@ -60,7 +57,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateAmmo(byte _laserCount)
     {
-        _ammoText.text = "Ammo: " + _laserCount.ToString();
+        _ammoCount.value = _laserCount;
     }
 
     public void OutOfAmmo()
@@ -70,10 +67,10 @@ public class UIManager : MonoBehaviour
 
     IEnumerator ShakeAmmoRoutine()
     {
-        _ammoText.transform.localPosition = _ammoTextStartPosition;
-        _ammoText.transform.localPosition = _ammoTextStartPosition + new Vector3(5f, 0, 0);
+        _ammoCount.transform.localPosition = _ammoCountStartPosition;
+        _ammoCount.transform.localPosition = _ammoCountStartPosition + new Vector3(5f, 0, 0);
         yield return new WaitForSeconds(0.1f);
-        _ammoText.transform.localPosition = _ammoTextStartPosition;
+        _ammoCount.transform.localPosition = _ammoCountStartPosition;
     }
 
     void GameOverSequence()
