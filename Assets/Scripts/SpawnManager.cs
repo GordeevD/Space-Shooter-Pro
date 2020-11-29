@@ -12,10 +12,22 @@ public class SpawnManager : MonoBehaviour
     private GameObject[] _powerups;
  
     private bool _stopSpawning = false;
-    
+    [SerializeField]
+    private bool _WaveSpawn = true;
+    private int _enemyAlive = 0;
+    private int _enemyWaveCount = 1;
+
+
     public void StartSpawning()
     {
-        StartCoroutine(SpawnEnemyRoutine());
+        if (_WaveSpawn)
+        {
+            StartCoroutine(SpawnWaveEnemyRoutine());
+        }
+        else
+        {
+            StartCoroutine(SpawnEnemyRoutine());
+        }
         StartCoroutine(SpawnPowerupRoutine());
     }
 
@@ -23,6 +35,31 @@ public class SpawnManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    IEnumerator SpawnWaveEnemyRoutine()
+    {
+        yield return new WaitForSeconds(3.0f);
+        
+
+        while (_stopSpawning == false)
+        {
+            _enemyAlive = GameObject.FindGameObjectsWithTag("Enemy").Length;
+            if (_enemyAlive == 0)
+            {
+                _enemyAlive = _enemyWaveCount;
+            
+                for (int amount = 0; amount < _enemyWaveCount; amount++)
+                {
+                    Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7, 0);
+                    GameObject newEnemy = Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
+                    newEnemy.transform.parent = _enemyContainer.transform;
+                }
+
+                _enemyWaveCount++;
+            }
+            yield return new WaitForSeconds(1.0f);
+        }
     }
 
     IEnumerator SpawnEnemyRoutine()

@@ -235,6 +235,7 @@ MonoBehaviour:
   - {fileID: 3529101468505776712, guid: 7f7f773b9a3ee4a0cbb01e68de70cb73, type: 3}
   - {fileID: 7116255085954133204, guid: 68e50a10be9e3482cb07a4500792340b, type: 3}
   - {fileID: 6689352243184577685, guid: f50fb599025684e50a46d978ffd705d7, type: 3}
+  _WaveSpawn: 1
 --- !u!4 &187181420
 Transform:
   m_ObjectHideFlags: 0
