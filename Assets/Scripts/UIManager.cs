@@ -22,7 +22,7 @@ public class UIManager : MonoBehaviour
     private Slider _ammoCount;
     private Vector3 _ammoCountStartPosition;
     [SerializeField]
-    private Slider _trustersHUD;
+    private Slider _thrustersHUD;
     // Start is called before the first frame update
     void Start()
     {
@@ -92,13 +92,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void UpdateTruster(byte val)
+    public void UpdateThruster(byte val)
     {
-        _trustersHUD.value = val;
+        _thrustersHUD.value = val;
     }
-    public void SetTrusterBarColor(Color val)
+    public void SetThrusterBarColor(Color val)
     {
-        Image img = _trustersHUD.fillRect.GetComponent<Image>();
+        Image img = _thrustersHUD.fillRect.GetComponent<Image>();
         if (img != null && val != null)
         {
             img.color = val;

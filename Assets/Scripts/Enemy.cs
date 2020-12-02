@@ -14,11 +14,37 @@ public class Enemy : MonoBehaviour
     private float _fireRate = 3.0f;
     private float _canFireTimer = -1;
     private bool _canFire = true;
-    private float _movementPattern = 0;
-    private float _movementLeftRight = 0;
+    private int _movementPattern = 0;
+    private int _movementLeftRight = 0;
     private bool _movementUp = false;
 
     private float _angle = 0f;
+
+    private bool _canFireFunction = true;
+    private float _movementTimer = 0f;
+    private float _loverLimit = 0f;
+    private int _superPowerType = 0;
+
+    // // // // // // // // // // // // // // // // // // // // 
+    // canFire = true. Can fire, damage the player
+    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking.
+    // behavior = 0 - linear,
+    // 1 - horizontal zig-zag side to side
+    // 2 - circle
+    // 3 - angle
+    // 4 - vertical zig-zag
+    // 5 - side to side
+    // 
+    public void setEnemyType(bool canFire, int superPowerType, int behavior)
+    {
+        
+       if (canFire == false) _canFireFunction = canFire;
+
+       if (superPowerType > 0) _superPowerType = superPowerType;
+
+       if (behavior > 0) _movementPattern = behavior;
+
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -40,67 +66,57 @@ public class Enemy : MonoBehaviour
             Debug.LogError("The AudioSource is NULL");
         }
 
-        _movementPattern = Random.Range(0, 4);
+        _movementPattern = Random.Range(0, 6);
         _movementLeftRight = Random.Range(0, 2);
+
+        _loverLimit = Random.Range(0.0f, 4.6f);
+
+
+    //DEBUG
+    setEnemyType(true, 2, 5);
     }
 
     // Update is called once per frame
     void Update()
     {
         CalculateMovement();
-
-        if(_canFire && Time.time > _canFireTimer)
-        {
-            _fireRate = Random.Range(3f, 7f);
-            _canFireTimer = Time.time + _fireRate;
-            GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
-            Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
-            foreach(Laser laser in lasers) {
-                laser.AssignEnemyLaser();
-            }
-        }
+        Fire();
     }
-
+ 
     void CalculateMovement()
     {
 
         Vector3 vector = Vector3.down;
         switch (_movementPattern)
         {
+            // behavior = 0 - linear,
+            // 1 - horizontal zig-zag side to side,
+            // 2 - circle,
+            // 3 - angle,
+            // 4 - vertical zig-zag
+            // 5 - side to side
             case 0:
                 break;
-            case 1: // side to side
+            case 1: // side to side zig-zag
 
                 if (_movementUp)
                 {
                     vector = Vector3.up;
-
-                    if (transform.position.y > 4.54f)
-                    {
-                        _movementUp = false;
-                    }
+                    if (transform.position.y > 4.54f) _movementUp = false;
                 }
                 else
                 {
-                    if (transform.position.y < 1f)
-                    {
-                        _movementUp = true;
-                    }
+                    if (transform.position.y < 1f) _movementUp = true;  
                 }
+
 
                 if (_movementLeftRight == 1)    // right. change direction
                 {
-                    if (transform.position.x > 10f)
-                    {
-                        _movementLeftRight = 0;
-                    }
+                    if (transform.position.x > 10f) _movementLeftRight = 0;
                 }
                 else                            // left. change direction
                 {
-                    if (transform.position.x < -10f)
-                    {
-                        _movementLeftRight = 1;
-                    }
+                    if (transform.position.x < -10f) _movementLeftRight = 1;   
                 }
 
                 vector = (_movementLeftRight == 0) ? vector + Vector3.left : vector + Vector3.right;
@@ -121,6 +137,35 @@ public class Enemy : MonoBehaviour
                 break;
             case 3: // angle
                 vector =  (_movementLeftRight == 0) ? Vector3.down + Vector3.left : Vector3.down + Vector3.right;
+                break;
+            case 4: // vertical zig-zag 
+
+                _movementTimer += Time.deltaTime;
+                if (_movementTimer > 1.2f)
+                {
+                    _movementLeftRight = (_movementLeftRight == 1) ? 0 : 1;
+                    _movementTimer = 0f;
+                }
+
+                vector = (_movementLeftRight == 0) ? vector + Vector3.left : vector + Vector3.right;
+
+                break;
+            case 5: // side to side
+
+                if (_loverLimit > transform.position.y)
+                {
+                    if (_movementLeftRight == 1)    // right. change direction
+                    {
+                        if (transform.position.x > 10f) _movementLeftRight = 0;
+                    }
+                    else                            // left. change direction
+                    {
+                        if (transform.position.x < -10f) _movementLeftRight = 1;
+                    }
+
+                    vector = (_movementLeftRight == 0) ?  Vector3.left : Vector3.right;
+                }
+
                 break;
             default:
                 Debug.Log("The Movement pattern is out of scope: " + _movementPattern.ToString());
@@ -143,6 +188,61 @@ public class Enemy : MonoBehaviour
         {
             transform.position = new Vector3(11.3f, transform.position.y, 0);
         }
+    }
+
+    void Fire()
+    {
+        if (_canFireFunction && _canFire && Time.time > _canFireTimer)
+        {
+            _fireRate = Random.Range(3f, 7f);
+            _canFireTimer = Time.time + _fireRate;
+
+            ////
+            //  0 - regular laser
+            //  1 - double laser
+            //  2 - laser beam
+            if (_superPowerType == 1)
+            {
+                GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+                Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
+                foreach (Laser laser in lasers)
+                {
+                    laser.AssignEnemyLaser();
+                }
+
+            }
+            else if (_superPowerType == 2)
+            {
+                StartCoroutine(FireLaserBeam());
+            }
+            else
+            {
+                GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+                Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
+                foreach (Laser laser in lasers)
+                {
+                    laser.AssignEnemyLaser();
+                }
+                // will convert to 1 laser soon..
+            }
+
+
+        }
+    }
+
+    IEnumerator FireLaserBeam()
+    {
+        for (byte i = 0; i < 6; i++)
+        {
+            GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+            Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
+            foreach (Laser laser in lasers)
+            {
+                laser.AssignEnemyLaser();
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+        // to be improved..
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -11,6 +11,11 @@ public class Powerup : MonoBehaviour
     // 0 = Triple Shot
     // 1 = Speed 
     // 2 = Shields
+    // 3 = Ammo
+    // 4 = Life
+    // 5 = Projectile
+    // 6 = Negative powerup
+    //
     [SerializeField]
     private int _powerupID;
     [SerializeField]
@@ -55,6 +60,9 @@ public class Powerup : MonoBehaviour
                         break;
                     case 5:
                         player.SecondaryFire();
+                        break;
+                    case 6:
+                        player.NegativePowerup();
                         break;
                     default:
                         Debug.Log("Default Value " + _powerupID);

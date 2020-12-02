@@ -235,6 +235,7 @@ MonoBehaviour:
   - {fileID: 3529101468505776712, guid: 7f7f773b9a3ee4a0cbb01e68de70cb73, type: 3}
   - {fileID: 7116255085954133204, guid: 68e50a10be9e3482cb07a4500792340b, type: 3}
   - {fileID: 6689352243184577685, guid: f50fb599025684e50a46d978ffd705d7, type: 3}
+  - {fileID: 3050677443883412686, guid: 86d3eee3bc17642f782312f12b063c15, type: 3}
   _WaveSpawn: 1
 --- !u!4 &187181420
 Transform:
@@ -1996,7 +1997,7 @@ GameObject:
   - component: {fileID: 1360933333}
   - component: {fileID: 1360933332}
   m_Layer: 5
-  m_Name: Truster_Icon
+  m_Name: Thruster_Icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2333,7 +2334,7 @@ MonoBehaviour:
   _gameOverText: {fileID: 521266190}
   _restartText: {fileID: 2039239577}
   _ammoCount: {fileID: 1851180114}
-  _trustersHUD: {fileID: 1942327123}
+  _thrustersHUD: {fileID: 1942327123}
 --- !u!1 &1851180113
 GameObject:
   m_ObjectHideFlags: 0
@@ -2471,7 +2472,7 @@ GameObject:
   - component: {fileID: 1942327124}
   - component: {fileID: 1942327123}
   m_Layer: 5
-  m_Name: Trusters
+  m_Name: Thrusters
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -82,7 +82,7 @@ public class SpawnManager : MonoBehaviour
         while (_stopSpawning == false)
         {
             Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7, 0);
-            int randomPowerup = Random.Range(0, 6);
+            int randomPowerup = Random.Range(0, 7);
 
             bool spawn = true;
             if(randomPowerup == 5 && Random.Range(0, 2) == 0) //second fire powerup. spawn rarely

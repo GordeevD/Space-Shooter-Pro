@@ -38,8 +38,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserOutOfAmmoClip;
     private bool _secondaryFireActive = false;
-    private byte _trusterValue = 100;
-    private bool _trusterReady = true;
+    private byte _thrusterValue = 100;
+    private bool _thrusterReady = true;
     [SerializeField]
     private GameObject _thrusterVisualizer;
     // Start is called before the first frame update
@@ -71,8 +71,8 @@ public class Player : MonoBehaviour
             _uiManager.UpdateAmmo(_laserCount);
         }
 
-        _uiManager.UpdateTruster(_trusterValue);
-        _uiManager.SetTrusterBarColor(Color.red);
+        _uiManager.UpdateThruster(_thrusterValue);
+        _uiManager.SetThrusterBarColor(Color.red);
 
     }
 
@@ -98,17 +98,17 @@ public class Player : MonoBehaviour
         float speed = _speed;
 
         
-        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && _trusterReady) {
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && _thrusterReady) {
             speed *= 2;
 
             _thrusterVisualizer.transform.localScale = new Vector3(1 + (speed / 100) * 2, 1, 1);
 
-            _trusterValue -= 1;
-            _uiManager.UpdateTruster(_trusterValue);
-            if (_trusterValue == 0)
+            _thrusterValue -= 1;
+            _uiManager.UpdateThruster(_thrusterValue);
+            if (_thrusterValue == 0)
             {
-                _trusterReady = false;
-                StartCoroutine(TrusterCoolDownRoutine());
+                _thrusterReady = false;
+                StartCoroutine(ThrusterCoolDownRoutine());
             }
         }
         else
@@ -132,17 +132,17 @@ public class Player : MonoBehaviour
 
     }
 
-    IEnumerator TrusterCoolDownRoutine()
+    IEnumerator ThrusterCoolDownRoutine()
     {
-        _uiManager.SetTrusterBarColor(Color.grey);
-        while (_trusterValue < 100)
+        _uiManager.SetThrusterBarColor(Color.grey);
+        while (_thrusterValue < 100)
         {
-            _trusterValue += 1;
-            _uiManager.UpdateTruster(_trusterValue);
+            _thrusterValue += 1;
+            _uiManager.UpdateThruster(_thrusterValue);
             yield return new WaitForSeconds(0.05f);
         }
-        _uiManager.SetTrusterBarColor(Color.red);
-        _trusterReady = true;
+        _uiManager.SetThrusterBarColor(Color.red);
+        _thrusterReady = true;
     }
 
     void FireLaser()
@@ -347,6 +347,37 @@ public class Player : MonoBehaviour
         List<Color> _shieldColors = new List<Color>() { Color.white, Color.green, Color.red };
         SpriteRenderer shieldSpriteRender = _shieldVisualizer.GetComponent<SpriteRenderer>();
         shieldSpriteRender.color = _shieldColors[_shieldStrength - 1];
+    }
+
+    public void NegativePowerup()
+    {
+        _lives = 1;
+        _rightEngine.SetActive(true);
+        _leftEngine.SetActive(true);
+        _uiManager.UpdateLives(_lives);
+
+        _isShieldActive = false;
+        _shieldVisualizer.SetActive(false);
+
+        _laserCount = 1;
+        _uiManager.UpdateAmmo(_laserCount);
+
+        _secondaryFireActive = false;
+        
+        _thrusterValue = 0;
+        _uiManager.UpdateThruster(_thrusterValue);
+        _thrusterReady = false;
+            StartCoroutine(ThrusterCoolDownRoutine());
+
+        float speed = _speed;
+        _speed = 2f;
+        StartCoroutine(RecoverFromNegativePowerup(speed));
+    }
+
+    IEnumerator RecoverFromNegativePowerup(float speed)
+    {
+        yield return new WaitForSeconds(10f);
+        _speed = speed;
     }
 
     // method to add score
