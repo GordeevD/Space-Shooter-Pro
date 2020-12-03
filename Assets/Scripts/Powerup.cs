@@ -21,7 +21,7 @@ public class Powerup : MonoBehaviour
     [SerializeField]
     private AudioClip _audioClip;
     private SpawnManager _spawnManager;
-
+    private GameObject _player;
     private void Start()
     {
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
@@ -29,12 +29,23 @@ public class Powerup : MonoBehaviour
         {
             Debug.LogError("The spawn manager is NULL");
         }
+
+        _player = GameObject.FindWithTag("Player");
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.down * _speed * Time.deltaTime);
+       
+        if (Input.GetKey(KeyCode.C))
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _speed * Time.deltaTime);
+        }
+        else
+        {
+            transform.Translate(Vector3.down * _speed * Time.deltaTime);
+        }
+       
         if (transform.position.y < -4.5f)
         {
             OnPowerupDissolve();

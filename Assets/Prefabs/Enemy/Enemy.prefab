@@ -51,6 +51,8 @@ MonoBehaviour:
   _speed: 4
   _laserPrefab: {fileID: 4018360478344401617, guid: d39d3124dfd5141c6b4fef50d4c2a8c1,
     type: 3}
+  _shieldPrefab: {fileID: 8318053894773851741, guid: 99cd7d5b0468d4c058bf673edf4b9cff,
+    type: 3}
 --- !u!212 &5040161755192892449
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -89,7 +91,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -583310165
   m_SortingLayer: 2
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 3154912113cbb4a498df6f571c74e18c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

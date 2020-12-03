@@ -20,7 +20,7 @@ public class SpawnManager : MonoBehaviour
     private int _currentWavePowerupToSpawn = 0;
     private int _currentWavePowerupSpawned = 0;
 
-    private int _percentEnemies = 50;
+    private float _percentEnemies = 50f;
     
     public void SpawnEnemy()
     {
@@ -42,6 +42,8 @@ public class SpawnManager : MonoBehaviour
 
     public void StartSpawning()
     {
+        BalancedSpawningEnemiesVersusPowerups(50);
+
         if (_WaveSpawn)
         {
             StartCoroutine(SpawnWaveEnemyRoutine());
@@ -85,8 +87,8 @@ public class SpawnManager : MonoBehaviour
         // 70 / 3 = 23.3   - percent of one enemy
         // 100/23.3 = 4.29  == 100%
         // 4.29 - 3 = 1.29 Round up to 2
-        
-        _currentWavePowerupToSpawn = Mathf.CeilToInt(Mathf.Ceil(100 / (_percentEnemies / enemiesSpawned)) - enemiesSpawned);
+        float oneEnemyPercent = _percentEnemies / enemiesSpawned;
+        _currentWavePowerupToSpawn = Mathf.CeilToInt(Mathf.Ceil(100f / oneEnemyPercent) - enemiesSpawned);
     }
 
 
@@ -136,7 +138,7 @@ public class SpawnManager : MonoBehaviour
 
             bool spawn = true;
 
-            if (_currentWavePowerupSpawned >=_currentWavePowerupToSpawn) spawn = false;
+            if (_WaveSpawn && _currentWavePowerupSpawned >= _currentWavePowerupToSpawn) randomPowerup = 3; // spawn = false;
 
             if (randomPowerup == 5 && Random.Range(0, 2) == 0) randomPowerup = 3; //second fire powerup. spawn rarely, ammo instead
 

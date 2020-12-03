@@ -24,8 +24,11 @@ public class Enemy : MonoBehaviour
     private float _movementTimer = 0f;
     private float _loverLimit = 0f;
     private int _superPowerType = 0;
-
     private SpawnManager _spawnManager;
+    private bool _isShieldActive = false;
+    [SerializeField]
+    private GameObject _shieldPrefab;
+    private GameObject _enemyShield;
     // // // // // // // // // // // // // // // // // // // // 
     // canFire = true. Can fire, damage the player
     // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking.
@@ -36,10 +39,12 @@ public class Enemy : MonoBehaviour
     // 4 - vertical zig-zag
     // 5 - side to side
     // 
-    public void setEnemyType(bool canFire, int superPowerType, int behavior)
+    public void setEnemyType(bool canFire, bool gotShield, int superPowerType, int behavior)
     {
-        
+
        if (canFire == false) _canFireFunction = canFire;
+
+        _isShieldActive = gotShield;
 
        if (superPowerType > 0) _superPowerType = superPowerType;
 
@@ -78,7 +83,18 @@ public class Enemy : MonoBehaviour
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-        setEnemyType(Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 6));
+        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 6));
+
+
+        _enemyShield = Instantiate(_shieldPrefab, this.transform.position, Quaternion.identity);
+        _enemyShield.transform.SetParent(this.transform);
+        _enemyShield.transform.localScale = new Vector3(1f, 1f, 1f);
+
+        if (_isShieldActive)
+        {
+            _enemyShield.SetActive(true);
+        }
+
         
     }
 
@@ -256,23 +272,40 @@ public class Enemy : MonoBehaviour
        
         if (other.CompareTag("Player"))
         {
-            _speed = 0;
-            _canFire = false;
-            _anim.SetTrigger("OnEnemyDeath");
-
             if (_player != null)
             {
                 _player.Damage();
             }
+
+            if (_isShieldActive)
+            {
+                _isShieldActive = false;
+                _enemyShield.SetActive(false);
+                return;
+            }
+            _speed = 0;
+            _canFire = false;
+            _anim.SetTrigger("OnEnemyDeath");
+
+
             OnEnemyDeath();
 
         }
         if (other.CompareTag("Laser"))
         {
+            Destroy(other.gameObject);
+
+            if (_isShieldActive)
+            {
+                _isShieldActive = false;
+                _enemyShield.SetActive(false);
+                return;
+            }
+
             _speed = 0;
             _canFire = false;
             _anim.SetTrigger("OnEnemyDeath");
-            Destroy(other.gameObject);
+
             //add score 10
             if (_player != null)
             {
@@ -286,6 +319,7 @@ public class Enemy : MonoBehaviour
     {
         _audioSource.Play();
         Destroy(GetComponent<Collider2D>());
+        Destroy(_enemyShield.gameObject);
         _spawnManager.OnEnemyDeath();
         Destroy(this.gameObject, 2.4f);     
     }
