@@ -20,6 +20,16 @@ public class Powerup : MonoBehaviour
     private int _powerupID;
     [SerializeField]
     private AudioClip _audioClip;
+    private SpawnManager _spawnManager;
+
+    private void Start()
+    {
+        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        if (_spawnManager == null)
+        {
+            Debug.LogError("The spawn manager is NULL");
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -27,7 +37,7 @@ public class Powerup : MonoBehaviour
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
         if (transform.position.y < -4.5f)
         {
-            Destroy(this.gameObject);
+            OnPowerupDissolve();
         }
     }
 
@@ -70,7 +80,12 @@ public class Powerup : MonoBehaviour
                 }
             }
 
-            Destroy(this.gameObject);
+            OnPowerupDissolve();
         }
+    }
+    private void OnPowerupDissolve()
+    {
+        _spawnManager.OnPowerupDissolve();
+        Destroy(this.gameObject);
     }
 }

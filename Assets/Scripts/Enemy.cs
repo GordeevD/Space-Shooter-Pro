@@ -25,6 +25,7 @@ public class Enemy : MonoBehaviour
     private float _loverLimit = 0f;
     private int _superPowerType = 0;
 
+    private SpawnManager _spawnManager;
     // // // // // // // // // // // // // // // // // // // // 
     // canFire = true. Can fire, damage the player
     // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking.
@@ -66,14 +67,19 @@ public class Enemy : MonoBehaviour
             Debug.LogError("The AudioSource is NULL");
         }
 
+        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        if (_spawnManager == null)
+        {
+            Debug.LogError("The spawn manager is NULL");
+        }
+
         _movementPattern = Random.Range(0, 6);
         _movementLeftRight = Random.Range(0, 2);
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-
-    //DEBUG
-    setEnemyType(true, 2, 5);
+        setEnemyType(Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 6));
+        
     }
 
     // Update is called once per frame
@@ -258,9 +264,7 @@ public class Enemy : MonoBehaviour
             {
                 _player.Damage();
             }
-            _audioSource.Play();
-            Destroy(GetComponent<Collider2D>());
-            Destroy(this.gameObject, 2.4f);
+            OnEnemyDeath();
 
         }
         if (other.CompareTag("Laser"))
@@ -274,10 +278,16 @@ public class Enemy : MonoBehaviour
             {
                 _player.AddScore(10);
             }
-            _audioSource.Play();
-            Destroy(GetComponent<Collider2D>());
-            Destroy(this.gameObject, 2.4f);
+            OnEnemyDeath();
         }
+    }
+
+    private void OnEnemyDeath()
+    {
+        _audioSource.Play();
+        Destroy(GetComponent<Collider2D>());
+        _spawnManager.OnEnemyDeath();
+        Destroy(this.gameObject, 2.4f);     
     }
 
     private void OnBecameInvisible()
