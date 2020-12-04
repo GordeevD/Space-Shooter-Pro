@@ -31,13 +31,15 @@ public class Enemy : MonoBehaviour
     private GameObject _enemyShield;
     // // // // // // // // // // // // // // // // // // // // 
     // canFire = true. Can fire, damage the player
-    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking.
+    // gotShield = true
+    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking
     // behavior = 0 - linear,
     // 1 - horizontal zig-zag side to side
     // 2 - circle
     // 3 - angle
     // 4 - vertical zig-zag
     // 5 - side to side
+    // 6 - Ram. If an enemy is close toa player, the enemywill try and “ram” it
     // 
     public void setEnemyType(bool canFire, bool gotShield, int superPowerType, int behavior)
     {
@@ -83,7 +85,7 @@ public class Enemy : MonoBehaviour
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 6));
+        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 7));
 
 
         _enemyShield = Instantiate(_shieldPrefab, this.transform.position, Quaternion.identity);
@@ -189,6 +191,32 @@ public class Enemy : MonoBehaviour
                 }
 
                 break;
+            case 6:
+                if (_player != null)
+                {
+                    if (Vector3.Distance(transform.position, _player.transform.position) < 4f)
+                    {
+                        //    Debug.Log("Player detected in range");
+                        vector = Vector3.zero;
+                        Vector3 target = _player.transform.position;
+                        transform.position = Vector3.MoveTowards(transform.position, target, _speed * Time.deltaTime);
+
+                        //rotate
+                        float rotationSpeed = 5f;
+                        float offset = 90f;
+                        Vector3 direction = target - transform.position;
+                        direction.Normalize();
+                        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                        //transform.rotation = Quaternion.Euler(Vector3.forward * (angle + offset));
+                        Quaternion rotation = Quaternion.AngleAxis(angle + offset, Vector3.forward);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
+                    }
+                    else
+                    {
+                         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.identity, 5f * Time.deltaTime);
+                    }
+                }
+                break;
             default:
                 Debug.Log("The Movement pattern is out of scope: " + _movementPattern.ToString());
                 break;
@@ -281,7 +309,11 @@ public class Enemy : MonoBehaviour
             {
                 _isShieldActive = false;
                 _enemyShield.SetActive(false);
-                return;
+
+                if (_movementPattern != 6)
+                {
+                    return;
+                }
             }
             _speed = 0;
             _canFire = false;
