@@ -22,6 +22,8 @@ public class Powerup : MonoBehaviour
     private AudioClip _audioClip;
     private SpawnManager _spawnManager;
     private GameObject _player;
+    [SerializeField]
+    private GameObject _explosionPrefab;
     private void Start()
     {
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
@@ -93,10 +95,19 @@ public class Powerup : MonoBehaviour
 
             OnPowerupDissolve();
         }
-    }
-    private void OnPowerupDissolve()
+        else if (other.CompareTag("Laser"))
+        {
+            Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+            Destroy(other.gameObject);
+            OnPowerupDissolve(0.25f);
+        }
+
+
+        }
+    private void OnPowerupDissolve(float delay = 0f)
     {
+        Destroy(GetComponent<Collider2D>());
         _spawnManager.OnPowerupDissolve();
-        Destroy(this.gameObject);
+        Destroy(this.gameObject, delay);
     }
 }

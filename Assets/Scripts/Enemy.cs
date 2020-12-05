@@ -32,7 +32,7 @@ public class Enemy : MonoBehaviour
     // // // // // // // // // // // // // // // // // // // // 
     // canFire = true. Can fire, damage the player
     // gotShield = true
-    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking
+    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking, 3 - powerup killer
     // behavior = 0 - linear,
     // 1 - horizontal zig-zag side to side
     // 2 - circle
@@ -51,7 +51,10 @@ public class Enemy : MonoBehaviour
        if (superPowerType > 0) _superPowerType = superPowerType;
 
        if (behavior > 0) _movementPattern = behavior;
-
+        //DEBUG powerup killer
+        _canFireFunction = true;
+        _superPowerType = 3;
+        _movementPattern = 5;
     }
 
     // Start is called before the first frame update
@@ -85,7 +88,7 @@ public class Enemy : MonoBehaviour
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 3), Random.Range(0, 7));
+        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 4), Random.Range(0, 7));
 
 
         _enemyShield = Instantiate(_shieldPrefab, this.transform.position, Quaternion.identity);
@@ -119,6 +122,7 @@ public class Enemy : MonoBehaviour
             // 3 - angle,
             // 4 - vertical zig-zag
             // 5 - side to side
+            // 6 - ram
             case 0:
                 break;
             case 1: // side to side zig-zag
@@ -196,7 +200,6 @@ public class Enemy : MonoBehaviour
                 {
                     if (Vector3.Distance(transform.position, _player.transform.position) < 4f)
                     {
-                        //    Debug.Log("Player detected in range");
                         vector = Vector3.zero;
                         Vector3 target = _player.transform.position;
                         transform.position = Vector3.MoveTowards(transform.position, target, _speed * Time.deltaTime);
@@ -207,7 +210,6 @@ public class Enemy : MonoBehaviour
                         Vector3 direction = target - transform.position;
                         direction.Normalize();
                         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                        //transform.rotation = Quaternion.Euler(Vector3.forward * (angle + offset));
                         Quaternion rotation = Quaternion.AngleAxis(angle + offset, Vector3.forward);
                         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
                     }
@@ -242,7 +244,25 @@ public class Enemy : MonoBehaviour
 
     void Fire()
     {
-        if (_canFireFunction && _canFire && Time.time > _canFireTimer)
+        if (_canFireFunction && _superPowerType == 3)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10);
+
+            Debug.DrawRay(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10, Color.red, 0.01f);
+
+            if (hit.collider != null)
+            {
+                //Debug.Log(hit.collider.name);
+                if ((hit.collider.CompareTag("Powerup") || hit.collider.CompareTag("Player")) && _canFire && Time.time > _canFireTimer)
+                {
+                    _fireRate = Random.Range(3f, 7f);
+                    _canFireTimer = Time.time + _fireRate;
+
+                    ShootOne();
+                }
+            }
+        }
+        else if (_canFireFunction && _canFire && Time.time > _canFireTimer)
         {
             _fireRate = Random.Range(3f, 7f);
             _canFireTimer = Time.time + _fireRate;
@@ -251,32 +271,33 @@ public class Enemy : MonoBehaviour
             //  0 - regular laser
             //  1 - double laser
             //  2 - laser beam
-            if (_superPowerType == 1)
+            //  3 - powerup killer
+            switch (_superPowerType)
             {
-                GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
-                Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
-                foreach (Laser laser in lasers)
-                {
-                    laser.AssignEnemyLaser();
-                }
-
-            }
-            else if (_superPowerType == 2)
-            {
-                StartCoroutine(FireLaserBeam());
-            }
-            else
-            {
-                GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
-                Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
-                foreach (Laser laser in lasers)
-                {
-                    laser.AssignEnemyLaser();
-                }
-                // will convert to 1 laser soon..
+                case 2:
+                    StartCoroutine(FireLaserBeam());
+                    break;
+                case 3:
+                    //    StartCoroutine(FireToPowerup());
+                    
+                    break;
+                default:
+                    ShootOne();
+                    // will convert to 1 laser soon..
+                    break;
             }
 
+        }
 
+    }
+
+    private void ShootOne()
+    {
+        GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+        Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
+        foreach (Laser laser in lasers)
+        {
+            laser.AssignEnemyLaser();
         }
     }
 
