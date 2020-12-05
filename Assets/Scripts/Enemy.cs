@@ -51,10 +51,15 @@ public class Enemy : MonoBehaviour
        if (superPowerType > 0) _superPowerType = superPowerType;
 
        if (behavior > 0) _movementPattern = behavior;
-        //DEBUG powerup killer
+        ////DEBUG powerup killer
+        //_canFireFunction = true;
+        //_superPowerType = 3;
+        //_movementPattern = 5;
+
+       //DEBUG powerup killer
         _canFireFunction = true;
-        _superPowerType = 3;
-        _movementPattern = 5;
+        _superPowerType = 4;
+        _movementPattern = 0;
     }
 
     // Start is called before the first frame update
@@ -88,7 +93,7 @@ public class Enemy : MonoBehaviour
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 4), Random.Range(0, 7));
+        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 5), Random.Range(0, 7));
 
 
         _enemyShield = Instantiate(_shieldPrefab, this.transform.position, Quaternion.identity);
@@ -244,42 +249,52 @@ public class Enemy : MonoBehaviour
 
     void Fire()
     {
-        if (_canFireFunction && _superPowerType == 3)
+        ////
+        //  0 - regular laser
+        //  1 - double laser
+        //  2 - laser beam
+        //  3 - powerup killer
+        //  4 - backwards sniper
+
+       if (_canFireFunction && _canFire && Time.time > _canFireTimer)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10);
-
-            Debug.DrawRay(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10, Color.red, 0.01f);
-
-            if (hit.collider != null)
-            {
-                //Debug.Log(hit.collider.name);
-                if ((hit.collider.CompareTag("Powerup") || hit.collider.CompareTag("Player")) && _canFire && Time.time > _canFireTimer)
-                {
-                    _fireRate = Random.Range(3f, 7f);
-                    _canFireTimer = Time.time + _fireRate;
-
-                    ShootOne();
-                }
-            }
-        }
-        else if (_canFireFunction && _canFire && Time.time > _canFireTimer)
-        {
-            _fireRate = Random.Range(3f, 7f);
-            _canFireTimer = Time.time + _fireRate;
-
-            ////
-            //  0 - regular laser
-            //  1 - double laser
-            //  2 - laser beam
-            //  3 - powerup killer
             switch (_superPowerType)
             {
                 case 2:
+                    _fireRate = Random.Range(3f, 7f);
+                    _canFireTimer = Time.time + _fireRate;
+
                     StartCoroutine(FireLaserBeam());
                     break;
                 case 3:
                     //    StartCoroutine(FireToPowerup());
-                    
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10);
+
+                    Debug.DrawRay(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10, Color.red, 0.01f);
+
+                    if (hit.collider != null)
+                    {
+                        //Debug.Log(hit.collider.name);
+                        if ((hit.collider.CompareTag("Powerup") || hit.collider.CompareTag("Player")) && _canFire && Time.time > _canFireTimer)
+                        {
+                           ShootOne();
+                        }
+                    }
+                    break;
+                case 4:
+
+                    RaycastHit2D hitBack = Physics2D.Raycast(transform.position + new Vector3(0, 2f, 0), Vector2.up * 10);
+
+                    Debug.DrawRay(transform.position + new Vector3(0, 2f, 0), Vector2.up * 10, Color.red, 0.01f);
+
+                    if (hitBack.collider != null)
+                    {
+                        if (hitBack.collider.CompareTag("Player"))
+                        {
+                            ShootOne(true);
+                        }
+                    }
+
                     break;
                 default:
                     ShootOne();
@@ -291,13 +306,23 @@ public class Enemy : MonoBehaviour
 
     }
 
-    private void ShootOne()
+    private void ShootOne(bool backwards = false)
     {
-        GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+        _fireRate = Random.Range(3f, 7f);
+        _canFireTimer = Time.time + _fireRate;
+
+        Vector3 laserPosition = transform.position;
+        if (backwards)
+        {
+            laserPosition += new Vector3(0, 3f, 0);
+        }
+
+        GameObject enemyLaser = Instantiate(_laserPrefab, laserPosition, Quaternion.identity);
         Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
         foreach (Laser laser in lasers)
         {
-            laser.AssignEnemyLaser();
+            laser.AssignEnemyLaser(backwards);
+
         }
     }
 

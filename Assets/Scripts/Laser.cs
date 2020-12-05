@@ -9,7 +9,7 @@ public class Laser : MonoBehaviour
     private bool _isEnemyLaser = false;
     private Transform _target = null;
     Rigidbody2D rb;
-
+    private bool _backwards = false;
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -17,19 +17,18 @@ public class Laser : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (_isEnemyLaser)
-        {
-            MoveDown(); 
-        } else
-        {
-            if (_target == null)
+        if (_target == null)
+        { if (_isEnemyLaser && !_backwards)
+            {
+                MoveDown(); 
+            } else
             {
                 MoveUp();
             }
-            else
-            {
-                MoveToTarget();
-            }
+        }
+        else
+        {
+            MoveToTarget();
         }
     }
 
@@ -58,9 +57,10 @@ public class Laser : MonoBehaviour
         _target = target;
     }
 
-    public void AssignEnemyLaser()
+    public void AssignEnemyLaser(bool backwards = false)
     {
         _isEnemyLaser = true;
+        _backwards = backwards;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -71,6 +71,7 @@ public class Laser : MonoBehaviour
             if (player != null)
             {
                 player.Damage();
+                Destroy(this.gameObject);
             }
         }
     }
