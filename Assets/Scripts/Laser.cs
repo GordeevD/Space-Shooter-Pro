@@ -63,6 +63,11 @@ public class Laser : MonoBehaviour
         _backwards = backwards;
     }
 
+    public bool IsEnemyLaser()
+    {
+        return _isEnemyLaser;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && _isEnemyLaser)
