@@ -24,6 +24,9 @@ public class Powerup : MonoBehaviour
     private GameObject _player;
     [SerializeField]
     private GameObject _explosionPrefab;
+    [SerializeField]
+    private const float _rotateSpeed = 50f;
+
     private void Start()
     {
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
@@ -33,21 +36,26 @@ public class Powerup : MonoBehaviour
         }
 
         _player = GameObject.FindWithTag("Player");
+
     }
 
     // Update is called once per frame
     void Update()
     {
-       
         if (Input.GetKey(KeyCode.C))
         {
             transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, _speed * Time.deltaTime);
         }
         else
         {
-            transform.Translate(Vector3.down * _speed * Time.deltaTime);
+            transform.Translate(Vector3.down * _speed * Time.deltaTime, Space.World);
         }
        
+        if (_powerupID == 5)
+        {
+            transform.Rotate(Vector3.back * _rotateSpeed * Time.deltaTime);
+        }
+
         if (transform.position.y < -4.5f)
         {
             OnPowerupDissolve();

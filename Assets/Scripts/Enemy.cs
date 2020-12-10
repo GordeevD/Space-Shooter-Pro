@@ -29,53 +29,55 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private GameObject _shieldPrefab;
     private GameObject _enemyShield;
+    private byte _shieldStrength = 1;
     private bool _avoidShots = false;
+    [SerializeField]
+    private bool _boss = false;
+    [SerializeField]
+    private GameObject _explosionPrefab;
+    private float timer = 0.0f;
     // // // // // // // // // // // // // // // // // // // // 
     // canFire = true. Can fire, damage the player
     //
     // gotShield = true
     //
-    // superPowerType = 0 - regular, 1 - Laser beam, 2 - heatseeking, 3 - powerup killer
-    //
+    // superPowerType = 0 - regular
+    //  1 - double laser
+    //  2 - laser beam
+    //  3 - powerup killer
+    //  4 - backwards sniper
+    //  5 - fan
+
     // behavior = 0 - linear,
     // 1 - horizontal zig-zag side to side
     // 2 - circle
     // 3 - angle
     // 4 - vertical zig-zag
     // 5 - side to side
-    // 6 - ram. If an enemy is close toa player, the enemywill try and “ram” it
-    //
+    // 6 - ram. If an enemy is close toa player, the enemy will try and “ram” it
+    // 7 - boss. Moves down the screen to the center and stays there.
     // avoidShots - will move away from laser
 
     public void setEnemyType(bool canFire, bool gotShield, int superPowerType, int behavior, bool avoidShots)
     {
 
-       if (canFire == false) _canFireFunction = canFire;
+        if (canFire == false) _canFireFunction = canFire;
 
         _isShieldActive = gotShield;
 
-       if (superPowerType > 0) _superPowerType = superPowerType;
+        if (superPowerType > 0) _superPowerType = superPowerType;
 
-       if (behavior > 0) _movementPattern = behavior;
+        if (behavior > 0) _movementPattern = behavior;
 
-       _avoidShots = avoidShots;
+        _avoidShots = avoidShots;
 
-        ////DEBUG powerup killer
-        //_canFireFunction = true;
-        //_superPowerType = 3;
-        //_movementPattern = 5;
+    }
 
-        //DEBUG Smart Enemy
-        //_canFireFunction = true;
-        //_superPowerType = 4;
-        //_movementPattern = 0;
-
-        //DEBUG Enemy avoid shots
-        _canFireFunction = true;
-       // _superPowerType = 0;
-       // _movementPattern = 6;
-        _avoidShots = true;
-
+    void ChangeShieldColor(byte _shieldStrength)
+    {
+        List<Color> _shieldColors = new List<Color>() { Color.white, Color.green, Color.red };
+        SpriteRenderer shieldSpriteRender = _enemyShield.GetComponent<SpriteRenderer>();
+        shieldSpriteRender.color = _shieldColors[_shieldStrength - 1];
     }
 
     // Start is called before the first frame update
@@ -104,24 +106,33 @@ public class Enemy : MonoBehaviour
             Debug.LogError("The spawn manager is NULL");
         }
 
-        _movementPattern = Random.Range(0, 6);
         _movementLeftRight = Random.Range(0, 2);
 
         _loverLimit = Random.Range(0.0f, 4.6f);
 
-        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 5), Random.Range(0, 7), Random.value < 0.5f);
+        setEnemyType(Random.value < 0.5f, Random.value < 0.5f, Random.Range(0, 5), Random.Range(0, 7), Random.value < 0.2f);
 
 
         _enemyShield = Instantiate(_shieldPrefab, this.transform.position, Quaternion.identity);
         _enemyShield.transform.SetParent(this.transform);
         _enemyShield.transform.localScale = new Vector3(1f, 1f, 1f);
 
+        if (_boss)
+        {
+            _enemyShield.transform.localScale += new Vector3(0.8f, 0, 0);
+            _superPowerType = 5;
+            _canFireFunction = true;
+            _isShieldActive = true;
+            _shieldStrength = 3;
+            _movementPattern = 7;
+            _loverLimit = 3f;
+        }
+
         if (_isShieldActive)
         {
             _enemyShield.SetActive(true);
         }
-
-        
+        ChangeShieldColor(_shieldStrength);
     }
 
     // Update is called once per frame
@@ -144,8 +155,7 @@ public class Enemy : MonoBehaviour
             // 4 - vertical zig-zag
             // 5 - side to side
             // 6 - ram
-            // 7 - avoid shoots
-
+            
             case 0:
                 break;
             case 1: // side to side zig-zag
@@ -242,19 +252,24 @@ public class Enemy : MonoBehaviour
                     }
                 }
                 break;
+            case 7:
+                if (_loverLimit > transform.position.y)
+                {
+                    vector = Vector3.zero;
+                }
+                break;
             default:
                 Debug.Log("The Movement pattern is out of scope: " + _movementPattern.ToString());
                 break;
         }
 
-        float _speedup = 1f;
-
+        // 7 - avoid shoots
         if (_avoidShots)
         {
 
             RaycastHit2D hit = Physics2D.CircleCast(transform.position - new Vector3(0, 1f, 0), 2f, Vector2.down * 10);
 
-//            Debug.DrawRay(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10, Color.red, 0.01f);
+//          Debug.DrawRay(transform.position - new Vector3(0, 1f, 0), Vector2.down * 10, Color.red, 0.01f);
 
             if (hit.collider != null)
             {
@@ -262,8 +277,8 @@ public class Enemy : MonoBehaviour
                 {
                     if (!hit.collider.GetComponent<Laser>().IsEnemyLaser())
                     {
-                        _speedup += 1.5f;
-                        vector = (hit.collider.transform.position.x > transform.position.x) ? vector + Vector3.left : vector + Vector3.right;
+                        Vector3 teleport = (hit.collider.transform.position.x > transform.position.x) ? transform.position + new Vector3(-3f, 0, 0) : transform.position + new Vector3(3f, 0, 0);
+                        transform.position = teleport;
                     }
                 }
 
@@ -271,7 +286,7 @@ public class Enemy : MonoBehaviour
         }
 
 
-        transform.Translate(vector * _speed * _speedup * Time.deltaTime);
+        transform.Translate(vector * _speed * Time.deltaTime);
 
         if (transform.position.y < -5f)
         {
@@ -297,6 +312,7 @@ public class Enemy : MonoBehaviour
         //  2 - laser beam
         //  3 - powerup killer
         //  4 - backwards sniper
+        //  5 - fan
 
        if (_canFireFunction && _canFire && Time.time > _canFireTimer)
         {
@@ -337,14 +353,48 @@ public class Enemy : MonoBehaviour
                     }
 
                     break;
+                case 5:
+                    ShootFan();
+                    break;
                 default:
                     ShootOne();
-                    // will convert to 1 laser soon..
+                    // will convert to 1 laser..
                     break;
             }
 
         }
 
+    }
+
+    private void ShootFan()
+    {
+        _fireRate = Random.Range(3f, 7f);
+        _canFireTimer = Time.time + _fireRate;
+
+        int bulletCount = 5;
+        float subtractOffset = 2f;
+        float angle = 9f;
+        for (int i = 0; i < bulletCount; i++)
+        {
+            CreateBullet(new Vector3(0f, 0f, ((i - subtractOffset) * angle)));
+        }
+    }
+
+    void CreateBullet(Vector3 offsetRotation)
+    {
+        Vector3 laserPosition = transform.position;
+        if (_boss)
+        {
+            laserPosition += new Vector3(0, -1.3f, 0);
+        }
+        GameObject bulletClone = Instantiate(_laserPrefab, laserPosition, transform.rotation);
+        bulletClone.transform.Rotate(offsetRotation);
+
+        Laser[] lasers = bulletClone.GetComponentsInChildren<Laser>();
+        foreach (Laser laser in lasers)
+        {
+            laser.AssignEnemyLaser();
+        }
     }
 
     private void ShootOne(bool backwards = false)
@@ -356,6 +406,9 @@ public class Enemy : MonoBehaviour
         if (backwards)
         {
             laserPosition += new Vector3(0, 3f, 0);
+        } else if(_boss)
+        {
+            laserPosition += new Vector3(0, -1.3f, 0);
         }
 
         GameObject enemyLaser = Instantiate(_laserPrefab, laserPosition, Quaternion.identity);
@@ -370,11 +423,18 @@ public class Enemy : MonoBehaviour
     {
         for (byte i = 0; i < 6; i++)
         {
-            GameObject enemyLaser = Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+            Vector3 laserPosition = transform.position;
+            if (_boss)
+            {
+                laserPosition += new Vector3(0, -2f, 0);
+            }
+
+            GameObject enemyLaser = Instantiate(_laserPrefab, laserPosition, Quaternion.identity);
             Laser[] lasers = enemyLaser.GetComponentsInChildren<Laser>();
             foreach (Laser laser in lasers)
             {
                 laser.AssignEnemyLaser();
+               
             }
             yield return new WaitForSeconds(0.1f);
         }
@@ -393,17 +453,32 @@ public class Enemy : MonoBehaviour
 
             if (_isShieldActive)
             {
-                _isShieldActive = false;
-                _enemyShield.SetActive(false);
-
+                _shieldStrength -= 1;
+                if (_shieldStrength < 1)
+                {
+                    _isShieldActive = false;
+                    _enemyShield.SetActive(false);
+                }
+                else
+                {
+                    ChangeShieldColor(_shieldStrength);
+                }
                 if (_movementPattern != 6)
                 {
                     return;
                 }
             }
+
             _speed = 0;
             _canFire = false;
-            _anim.SetTrigger("OnEnemyDeath");
+            if (_boss)
+            {
+                StartCoroutine(TripleExplosion());
+            }
+            else
+            {
+                _anim.SetTrigger("OnEnemyDeath");
+            }
 
 
             OnEnemyDeath();
@@ -415,15 +490,30 @@ public class Enemy : MonoBehaviour
 
             if (_isShieldActive)
             {
-                _isShieldActive = false;
-                _enemyShield.SetActive(false);
+                _shieldStrength -= 1;
+                if (_shieldStrength < 1)
+                {
+                    _isShieldActive = false;
+                    _enemyShield.SetActive(false);
+                }
+                else
+                {
+                    ChangeShieldColor(_shieldStrength);
+                }
                 return;
             }
 
             _speed = 0;
             _canFire = false;
-            _anim.SetTrigger("OnEnemyDeath");
 
+            if (_boss)
+            {
+                StartCoroutine(TripleExplosion());
+            }
+            else
+            {
+                _anim.SetTrigger("OnEnemyDeath");
+            }
             //add score 10
             if (_player != null)
             {
@@ -433,13 +523,26 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    IEnumerator TripleExplosion()
+    {
+        timer += Time.deltaTime;
+
+        while (timer < 1f)
+        {
+            GameObject explosion3 = Instantiate(_explosionPrefab, transform.position + new Vector3(Random.Range(-1.50f, 1.50f), Random.Range(-1.50f, 1.50f), 0), Quaternion.identity);
+            yield return new WaitForSeconds(0.24f);
+        }
+    }
+
     private void OnEnemyDeath()
     {
         _audioSource.Play();
         Destroy(GetComponent<Collider2D>());
         Destroy(_enemyShield.gameObject);
         _spawnManager.OnEnemyDeath();
-        Destroy(this.gameObject, 2.4f);     
+        float delay = 2.4f;
+        if (_boss) { delay = 1f; }
+        Destroy(this.gameObject, delay);
     }
 
     private void OnBecameInvisible()

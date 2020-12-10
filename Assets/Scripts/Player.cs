@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
         }
 
         _uiManager.UpdateThruster(_thrusterValue);
-        _uiManager.SetThrusterBarColor(Color.red);
+        _uiManager.SetThrusterBarColor(new Color32(83, 125, 212, 255));
 
     }
 
@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
             FireLaser();
-        }
+        }    
 
     }
 
@@ -97,7 +97,6 @@ public class Player : MonoBehaviour
 
         float speed = _speed;
 
-        
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && _thrusterReady) {
             speed *= 2;
 
@@ -116,6 +115,15 @@ public class Player : MonoBehaviour
             _thrusterVisualizer.transform.localScale = new Vector3(1, 1, 1);
         }
 
+
+        if (horizontalInput != 0 || verticalInput != 0)
+        {
+            _thrusterVisualizer.transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+        else
+        {
+            _thrusterVisualizer.transform.localScale = new Vector3(0.8f, 1f, 1f);
+        }
 
 
         transform.Translate(direction * speed * Time.deltaTime);
@@ -141,7 +149,7 @@ public class Player : MonoBehaviour
             _uiManager.UpdateThruster(_thrusterValue);
             yield return new WaitForSeconds(0.05f);
         }
-        _uiManager.SetThrusterBarColor(Color.red);
+        _uiManager.SetThrusterBarColor(new Color32(83, 125, 212, 255));
         _thrusterReady = true;
     }
 

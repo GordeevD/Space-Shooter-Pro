@@ -7,6 +7,8 @@ public class SpawnManager : MonoBehaviour
     [SerializeField]
     private GameObject _enemyPrefab;
     [SerializeField]
+    private GameObject _enemyBossPrefab;
+    [SerializeField]
     private GameObject _enemyContainer;
     [SerializeField]
     private GameObject[] _powerups;
@@ -26,8 +28,14 @@ public class SpawnManager : MonoBehaviour
     {
         _currentEnemiesCount++;
         Vector3 posToSpawn = new Vector3(Random.Range(-8f, 8f), 7, 0);
-        GameObject newEnemy = Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity);
-        newEnemy.transform.parent = _enemyContainer.transform;
+        Instantiate(_enemyPrefab, posToSpawn, Quaternion.identity, _enemyContainer.transform);
+    }
+
+    public void SpawnEnemyBoss()
+    {
+        _currentEnemiesCount++;
+        Vector3 posToSpawn = new Vector3(0, 7, 0);
+        GameObject newBoss = Instantiate(_enemyBossPrefab, posToSpawn, Quaternion.identity, _enemyContainer.transform);
     }
 
     public void OnEnemyDeath()
@@ -91,6 +99,19 @@ public class SpawnManager : MonoBehaviour
         _currentWavePowerupToSpawn = Mathf.CeilToInt(Mathf.Ceil(100f / oneEnemyPercent) - enemiesSpawned);
     }
 
+    private bool isPrime(int number)
+    {
+        if (number == 1) return false;
+        if (number == 2) return true;
+
+        var limit = Mathf.Ceil(Mathf.Sqrt(number)); //hoisting the loop limit
+
+        for (int i = 2; i <= limit; ++i)
+            if (number % i == 0)
+                return false;
+        return true;
+
+    }
 
     IEnumerator SpawnWaveEnemyRoutine()
     {
@@ -106,12 +127,23 @@ public class SpawnManager : MonoBehaviour
                 CalculatePowerupBalance(_enemyWaveCount);
                 _currentWavePowerupSpawned = 0;
 
-                for (int amount = 0; amount < _enemyWaveCount; amount++)
+                if (isPrime(_enemyWaveCount))
                 {
-                    SpawnEnemy();
+
+                    SpawnEnemyBoss();
+
+                }
+                else
+                {
+                    for (int amount = 0; amount < _enemyWaveCount; amount++)
+                    {
+                        SpawnEnemy();
+                    }
+                    
                 }
 
                 _enemyWaveCount++;
+
             }
             yield return new WaitForSeconds(1.0f);
         }

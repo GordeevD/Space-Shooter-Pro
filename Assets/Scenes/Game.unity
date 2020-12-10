@@ -227,6 +227,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _enemyPrefab: {fileID: 1196648581248731308, guid: db2722d6c6a0f42ad97eade5d3493f3d,
     type: 3}
+  _enemyBossPrefab: {fileID: 1467841591373527507, guid: 0cae95ca3ea7d4129b668eaac4c8d32a,
+    type: 3}
   _enemyContainer: {fileID: 301167845}
   _powerups:
   - {fileID: 7379985597702540666, guid: 12ce4fcdef4d64448be8056ee87615d6, type: 3}
@@ -375,7 +377,7 @@ Transform:
   m_GameObject: {fileID: 465556202}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -3.4, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 632094708}
   m_RootOrder: 1
@@ -1330,7 +1332,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.58431375, g: 0.1009256, b: 0.1009256, a: 1}
+  m_Color: {r: 0.3250267, g: 0.48895854, b: 0.8301887, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
