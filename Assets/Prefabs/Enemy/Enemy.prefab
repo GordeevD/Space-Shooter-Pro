@@ -53,6 +53,8 @@ MonoBehaviour:
     type: 3}
   _shieldPrefab: {fileID: 8318053894773851741, guid: 99cd7d5b0468d4c058bf673edf4b9cff,
     type: 3}
+  _boss: 0
+  _explosionPrefab: {fileID: 0}
 --- !u!212 &5040161755192892449
 SpriteRenderer:
   m_ObjectHideFlags: 0

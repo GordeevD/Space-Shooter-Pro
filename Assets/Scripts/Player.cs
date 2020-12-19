@@ -266,14 +266,14 @@ public class Player : MonoBehaviour
     IEnumerator ShakeRoutine(float _shakeDuration, float _shakeMagnitude)
     {
         Camera camera = Camera.main;
-        Vector3 cameraPosition = camera.transform.localPosition;
+        Vector3 cameraPosition = camera.transform.position;
         float endTime = Time.time + _shakeDuration;
         while (endTime > Time.time)
             {
-                camera.transform.localPosition = cameraPosition + Random.insideUnitSphere * _shakeMagnitude;
+                camera.transform.position = cameraPosition + Random.insideUnitSphere * _shakeMagnitude;
                 yield return null;
             }
-        camera.transform.localPosition = cameraPosition;
+        camera.transform.position = cameraPosition;
     }
 
     public void TripleShotActive()

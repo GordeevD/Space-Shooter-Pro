@@ -127,7 +127,7 @@ public class SpawnManager : MonoBehaviour
                 CalculatePowerupBalance(_enemyWaveCount);
                 _currentWavePowerupSpawned = 0;
 
-                if (isPrime(_enemyWaveCount))
+                if (_enemyWaveCount > 3 && isPrime(_enemyWaveCount))
                 {
 
                     SpawnEnemyBoss();
